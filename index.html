@@ -112,8 +112,9 @@ details summary{cursor:pointer;font-weight:700;font-size:14px}
 
  <section class="card">
   <h2>یادآورها روی آیفون</h2>
-  <button class="btn ghost" id="ics" style="width:100%">ساخت فایل تقویم (۱۲ چرخه)</button>
-  <p class="note">بعد از زدن دکمه، Calendar یا «Add to Calendar» رو انتخاب کن و Add All بزن. هشدار اول هر منطقه ساعت ۹ صبحه، و برای پریود و PMS یه هشدار هم شب قبل ساعت ۲۰. بعد از هر کالیبره، تقویم Moodcast رو حذف کن و فایل جدید رو اضافه کن.</p>
+  <button class="btn ghost" id="ics" style="width:100%">افزودن به تقویم (۱۲ چرخه)</button>
+  <button class="btn ghost" id="icsShare" style="width:100%;margin-top:8px">ارسال فایل تقویم (Mail / Files)</button>
+  <p class="note">«افزودن به تقویم» رو بزن؛ اگه پرسید اجازه نمایش تقویم رو بده، بعد Add All. اگه کار نکرد، «ارسال فایل» ← Mail ← برای خودت بفرست و توی Mail روی فایل بزن. بعد از هر کالیبره، تقویم Moodcast رو حذف و دوباره اضافه کن.</p>
  </section>
 
  <section class="card">
@@ -347,16 +348,16 @@ SET.forEach(([id,k,i])=>$(id).addEventListener('change',()=>{
  state.settings=s;save();render();toast('تنظیمات ذخیره شد')}));
 
 // ---- ics ----
-$('ics').onclick=async()=>{
+function icsFile(){
  const cal=calibrate(state.periods,state.settings);
- if(!cal.periods.length){toast('اول یک تاریخ شروع پریود ثبت کن');return}
+ if(!cal.periods.length){toast('اول یک تاریخ شروع پریود ثبت کن');return null}
  const st=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
- const file=new File([buildICS(cal,12,st)],'moodcast.ics',{type:'text/calendar'});
- if(navigator.canShare&&navigator.canShare({files:[file]})){
-  try{await navigator.share({files:[file]});return}catch(e){if(e&&e.name==='AbortError')return}
- }
- const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download='moodcast.ics';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
-};
+ return new File([buildICS(cal,12,st)],'moodcast.ics',{type:'text/calendar'});
+}
+$('ics').onclick=()=>{const f=icsFile();if(!f)return;location.href=URL.createObjectURL(f)};
+$('icsShare').onclick=async()=>{const f=icsFile();if(!f)return;
+ if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]})}catch(e){}return}
+ const u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download='moodcast.ics';document.body.appendChild(a);a.click();a.remove()};
 
 // ---- backup ----
 $('bkOut').onclick=async()=>{const t=JSON.stringify(state);$('bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('کپی شد؛ یه جا نگهش دار')}catch(e){$('bkTxt').select();toast('متن رو انتخاب کردم؛ کپی کن')}};
