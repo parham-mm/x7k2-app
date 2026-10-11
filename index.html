@@ -113,6 +113,7 @@ details summary{cursor:pointer;font-weight:700;font-size:14px}
  <section class="card">
   <h2>یادآورها روی آیفون</h2>
   <button class="btn ghost" id="ics" style="width:100%">افزودن به تقویم (۱۲ چرخه)</button>
+  <button class="btn ghost" id="icsTest" style="width:100%;margin-top:8px">🔔 تست نوتیف (۳ دقیقه بعد)</button>
   <button class="btn ghost" id="icsShare" style="width:100%;margin-top:8px">ارسال فایل تقویم (Mail / Files)</button>
   <p class="note">«افزودن به تقویم» رو بزن؛ اگه پرسید اجازه نمایش تقویم رو بده، بعد Add All. اگه کار نکرد، «ارسال فایل» ← Mail ← برای خودت بفرست و توی Mail روی فایل بزن. بعد از هر کالیبره، تقویم Moodcast رو حذف و دوباره اضافه کن.</p>
  </section>
@@ -355,6 +356,12 @@ function icsFile(){
  return new File([buildICS(cal,12,st)],'moodcast.ics',{type:'text/calendar'});
 }
 $('ics').onclick=()=>{const f=icsFile();if(!f)return;location.href=URL.createObjectURL(f)};
+$('icsTest').onclick=()=>{
+ const p=n=>String(n).padStart(2,'0'),f=d=>`${d.getUTCFullYear()}${p(d.getUTCMonth()+1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}00Z`;
+ const a=new Date(Date.now()+3*60000),b=new Date(a.getTime()+15*60000),n=Date.now();
+ const t=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//moodcast//fa','BEGIN:VEVENT',`UID:test-${n}@moodcast`,`DTSTAMP:${f(new Date())}`,`DTSTART:${f(a)}`,`DTEND:${f(b)}`,'SUMMARY:⛈ تست Moodcast','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:⛈ تست Moodcast','TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n')+'\r\n';
+ location.href=URL.createObjectURL(new File([t],'test.ics',{type:'text/calendar'}));
+};
 $('icsShare').onclick=async()=>{const f=icsFile();if(!f)return;
  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]})}catch(e){}return}
  const u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download='moodcast.ics';document.body.appendChild(a);a.click();a.remove()};
