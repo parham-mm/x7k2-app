@@ -1,0 +1,451 @@
+<!doctype html><html lang="fa" dir="rtl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Moodcast">
+<meta name="theme-color" content="#141019">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Moodcast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap">
+<style>
+/* layout: single phone column — dial on top, then upcoming, then calibration and settings */
+:root{
+ --bg:#F4F2F6;--surface:#FFFFFF;--ink:#221A2B;--muted:#6E6577;--line:#E3DEE8;
+ --period:#C2255C;--pms:#B7791F;--p1:#6A4CE0;--p2:#13897A;--today:#221A2B;
+ --soft:#ECE8F1;
+ --f:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#141019;--surface:#1E1925;--ink:#EEE8F4;--muted:#A49BAE;--line:#302838;
+ --period:#F06292;--pms:#E3A64A;--p1:#9E88FF;--p2:#3FC1AE;--today:#EEE8F4;--soft:#29222F;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#141019;--surface:#1E1925;--ink:#EEE8F4;--muted:#A49BAE;--line:#302838;
+ --period:#F06292;--pms:#E3A64A;--p1:#9E88FF;--p2:#3FC1AE;--today:#EEE8F4;--soft:#29222F;color-scheme:dark}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.7;direction:rtl;padding:16px;padding-block:16px 48px}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+h1{font-size:26px;font-weight:800;margin:0;letter-spacing:-.2px}
+.date{color:var(--muted);font-size:14px}
+h2{font-size:13px;font-weight:700;color:var(--muted);margin:0 0 10px;letter-spacing:.3px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px}
+.dial{display:flex;flex-direction:column;align-items:center;gap:6px}
+.dial svg{width:100%;max-width:320px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:5px;vertical-align:middle}
+.up{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0;padding-top:0}
+.dot{width:12px;height:12px;border-radius:4px}
+.row b{font-weight:700}.row small{display:block;color:var(--muted);font-size:13px}
+.cd{font-variant-numeric:tabular-nums;text-align:left;font-weight:700;white-space:nowrap}
+.cd small{font-weight:400}
+.pick{display:flex;gap:8px;flex-wrap:wrap}
+select,button{font:inherit}
+select{flex:1;min-width:0;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer}
+.primary{background:var(--period);color:#fff;width:100%;margin-top:10px}
+.ghost{background:var(--soft);color:var(--ink)}
+.btn:focus-visible,select:focus-visible{outline:2px solid var(--p1);outline-offset:2px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stat{background:var(--soft);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.hist{list-style:none;margin:12px 0 0;padding:0}
+.hist li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tag{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.tag.gap{color:var(--pms)}
+.x{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;padding:4px 6px}
+.x.sure{color:var(--period);font-weight:700}
+.note{font-size:13px;color:var(--muted);margin:8px 0 0}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+th,td{padding:7px 6px;text-align:right;border-top:1px solid var(--line)}
+th{color:var(--muted);font-weight:500;border-top:0}
+details summary{cursor:pointer;font-weight:700;font-size:14px}
+.set{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;margin-top:12px;font-size:14px}
+.set input{width:64px;padding:6px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;text-align:center}
+.toast{position:fixed;inset-inline:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:488px;margin:0 auto;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-size:14px;text-align:center}
+@media (prefers-reduced-motion:no-preference){.toast{transition:opacity .2s}}
+.learn-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.stage{font-weight:700;font-size:14px;padding:3px 10px;border-radius:999px;background:var(--soft)}
+.stage.s0{color:var(--muted)}.stage.s1{color:var(--pms)}.stage.s2{color:var(--p2)}
+.meter{height:6px;border-radius:99px;background:var(--soft);margin:10px 0 4px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--p1);border-radius:99px}
+#lChart{width:100%;height:auto;margin-top:8px}
+.facts{list-style:none;margin:6px 0 0;padding:0;font-size:14px}
+.facts li{padding:7px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.facts li span:last-child{font-weight:700;font-variant-numeric:tabular-nums;text-align:left}
+</style>
+</head><body>
+<div class="wrap">
+ <header><h1 dir="ltr">Moodcast</h1><span class="date" id="today"></span></header>
+
+ <section class="card dial">
+  <svg id="ring" viewBox="0 0 320 320" role="img" aria-label="دایره چرخه"></svg>
+  <div class="legend">
+   <span><i style="background:var(--period)"></i>پریود</span>
+   <span><i style="background:var(--p1)"></i>اوج اولیه</span>
+   <span><i style="background:var(--p2)"></i>اوج ثانویه</span>
+   <span><i style="background:var(--pms)"></i>PMS</span>
+  </div>
+ </section>
+
+ <section class="card">
+  <h2>پیش‌رو</h2>
+  <div class="up" id="upcoming"></div>
+ </section>
+
+ <section class="card">
+  <h2>ثبت شروع پریود</h2>
+  <div class="pick">
+   <select id="sd" aria-label="روز"></select>
+   <select id="sm" aria-label="ماه"></select>
+   <select id="sy" aria-label="سال"></select>
+  </div>
+  <button class="btn primary" id="add">ثبت و کالیبره کن</button>
+  <div class="stats">
+   <div class="stat"><b id="stLen">–</b><span>طول چرخه (روز)</span></div>
+   <div class="stat"><b id="stSd">–</b><span>نوسان ±</span></div>
+   <div class="stat"><b id="stN">–</b><span>شخصی‌سازی</span></div>
+  </div>
+  <ul class="hist" id="hist"></ul>
+ </section>
+
+ <section class="card">
+  <h2>یادگیری</h2>
+  <div class="learn-head"><span class="stage" id="lStage"></span><span class="note" id="lCount" style="margin:0"></span></div>
+  <div class="meter" aria-hidden="true"><i id="lMeter"></i></div>
+  <svg id="lChart" viewBox="0 0 320 120" role="img" aria-label="طول چرخه‌های ثبت‌شده"></svg>
+  <ul class="facts" id="lFacts"></ul>
+ </section>
+
+ <section class="card">
+  <h2>یادآورها روی آیفون</h2>
+  <button class="btn ghost" id="ics" style="width:100%">افزودن به تقویم (۱۲ چرخه)</button>
+  <button class="btn ghost" id="icsTest" style="width:100%;margin-top:8px">🔔 تست نوتیف (۳ دقیقه بعد)</button>
+  <button class="btn ghost" id="icsShare" style="width:100%;margin-top:8px">ارسال فایل تقویم (Mail / Files)</button>
+  <p class="note">«افزودن به تقویم» رو بزن؛ اگه پرسید اجازه نمایش تقویم رو بده، بعد Add All. اگه کار نکرد، «ارسال فایل» ← Mail ← برای خودت بفرست و توی Mail روی فایل بزن. بعد از هر کالیبره، تقویم Moodcast رو حذف و دوباره اضافه کن.</p>
+ </section>
+
+ <section class="card">
+  <h2>۱۲ چرخه بعد</h2>
+  <div class="tbl"><table>
+   <thead><tr><th>پریود</th><th>اوج اولیه</th><th>PMS</th><th>اوج ثانویه</th><th>خطا</th></tr></thead>
+   <tbody id="tb"></tbody>
+  </table></div>
+ </section>
+
+ <section class="card">
+  <details>
+   <summary>تنظیمات فازها</summary>
+   <div class="set">
+    <label for="cPd">طول پریود (روز)</label><input id="cPd" type="number" min="2" max="10">
+    <label for="cPms">شروع PMS: چند روز قبل از پریود</label><input id="cPms" type="number" min="1" max="14">
+    <label for="cP1a">اوج اولیه: از چند روز قبل از پریود</label><input id="cP1a" type="number" min="1" max="30">
+    <label for="cP1b">اوج اولیه: تا چند روز قبل</label><input id="cP1b" type="number" min="1" max="30">
+    <label for="cP2a">اوج ثانویه: از چند روز قبل</label><input id="cP2a" type="number" min="1" max="30">
+    <label for="cP2b">اوج ثانویه: تا چند روز قبل</label><input id="cP2b" type="number" min="1" max="30">
+   </div>
+   <p class="note">فازها از پریود <b>بعدی</b> عقب شمرده می‌شن، چون فاز لوتئال ثابت‌تره و با کوتاه/بلند شدن چرخه درست جابه‌جا می‌شن.</p>
+    </details>
+ </section>
+
+ <section class="card">
+  <details>
+   <summary>پشتیبان‌گیری</summary>
+   <p class="note">داده‌ها فقط روی همین گوشی ذخیره می‌شن. هر چند وقت یه بار پشتیبان بگیر و متنش رو یه جا نگه دار.</p>
+   <textarea id="bkTxt" rows="3" style="width:100%;margin-top:8px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:13px monospace;padding:8px" dir="ltr" aria-label="متن پشتیبان"></textarea>
+   <div class="pick" style="margin-top:8px"><button class="btn ghost" id="bkOut" style="flex:1">کپی پشتیبان</button><button class="btn ghost" id="bkIn" style="flex:1">بازیابی از متن</button></div>
+  </details>
+ </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+// ---- Jalali <-> JDN (jalaali algorithm) ----
+const BRK=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+const div=(a,b)=>~~(a/b), mod=(a,b)=>a-~~(a/b)*b;
+function jalCal(jy,noLeap){let gy=jy+621,leapJ=-14,jp=BRK[0],jm,jump=0,n,i;
+ for(i=1;i<BRK.length;i++){jm=BRK[i];jump=jm-jp;if(jy<jm)break;leapJ+=div(jump,33)*8+div(mod(jump,33),4);jp=jm}
+ n=jy-jp;leapJ+=div(n,33)*8+div(mod(n,33)+3,4);if(mod(jump,33)===4&&jump-n===4)leapJ++;
+ const leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150,march=20+leapJ-leapG;if(noLeap)return{gy,march};
+ if(jump-n<6)n=n-jump+div(jump+4,33)*33;let leap=mod(mod(n+1,33)-1,4);if(leap===-1)leap=4;return{leap,gy,march}}
+function g2d(gy,gm,gd){let d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;return d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752}
+function d2g(jdn){let j=4*jdn+139361631;j=j+div(div(4*jdn+183187720,146097)*3,4)*4-3908;const i=div(mod(j,1461),4)*5+308;const gd=div(mod(i,153),5)+1,gm=mod(div(i,153),12)+1,gy=div(j,1461)-100100+div(8-gm,6);return{gy,gm,gd}}
+function j2d(jy,jm,jd){const r=jalCal(jy,true);return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1}
+function d2j(jdn){const gy=d2g(jdn).gy;let jy=gy-621;const r=jalCal(jy,false);let k=jdn-g2d(gy,3,r.march),jm,jd;
+ if(k>=0){if(k<=185){jm=1+div(k,31);jd=mod(k,31)+1;return{jy,jm,jd}}k-=186}else{jy--;k+=179;if(r.leap===1)k++}
+ jm=7+div(k,30);jd=mod(k,30)+1;return{jy,jm,jd}}
+function jMonthLen(jy,jm){if(jm<=6)return 31;if(jm<=11)return 30;return jalCal(jy,false).leap===0?30:29}
+
+// ---- model: learns cycle length from period starts only ----
+const DEFAULTS={len:28,sd:2.5,periodDays:5,pmsBefore:6,p1:[17,13],p2:[5,1]};
+const PRIOR={mu:28,k0:2,sd:2.5,v0:2,half:8};
+function learn(periods,settings){
+ const s={...DEFAULTS,...(settings||{})};
+ const p=[...new Set(periods)].sort((a,b)=>a-b);
+ const raw=[];for(let i=1;i<p.length;i++)raw.push({from:p[i-1],to:p[i],d:p[i]-p[i-1]});
+ const plaus=raw.filter(x=>x.d>=20&&x.d<=40).map(x=>x.d).sort((a,b)=>a-b);
+ let mu=plaus.length?(PRIOR.k0*PRIOR.mu+plaus[Math.floor(plaus.length/2)]*plaus.length)/(PRIOR.k0+plaus.length):PRIOR.mu;
+ let sd=PRIOR.sd,cyc=[],W=0;
+ for(let it=0;it<4;it++){
+  cyc=[];
+  raw.forEach(x=>{
+   if(x.d<15){cyc.push({...x,type:'short',w:0});return}
+   if(x.d>40){const k=Math.max(2,Math.round(x.d/mu));
+    if(Math.abs(x.d/k-mu)<=Math.max(3,1.5*sd)){for(let j=0;j<k;j++)cyc.push({...x,d:x.d/k,type:'imputed',k,part:j,w:0.5});return}
+    cyc.push({...x,type:'long',w:0});return}
+   cyc.push({...x,type:'cycle',w:1});
+  });
+  const n=cyc.length;
+  cyc.forEach((c,i)=>{if(!c.w)return;const age=n-1-i;c.rw=Math.pow(0.5,age/PRIOR.half);
+   const r=Math.abs(c.d-mu),lim=2.5*sd;c.hw=r<=lim?1:lim/r;if(r>3*sd&&c.type==='cycle')c.type='outlier';c.eff=c.w*c.rw*c.hw});
+  const used=cyc.filter(c=>c.eff);W=used.reduce((a,c)=>a+c.eff,0);
+  const k0=PRIOR.k0*3/(3+used.length);mu=(k0*PRIOR.mu+used.reduce((a,c)=>a+c.eff*c.d,0))/(k0+W);
+  const vu=used.filter(c=>c.type!=='outlier'),VW=vu.reduce((a,c)=>a+c.eff,0);sd=Math.sqrt((PRIOR.v0*PRIOR.sd**2+vu.reduce((a,c)=>a+c.eff*(c.d-mu)**2,0))/(PRIOR.v0+VW));
+ }
+ sd=Math.max(1,sd);
+ const real=cyc.filter(c=>c.type==='cycle');
+ let slope=0;
+ if(real.length>=6){const xs=real.map((_,i)=>i),ys=real.map(c=>c.d),m=xs.length,mx=xs.reduce((a,b)=>a+b)/m,my=ys.reduce((a,b)=>a+b)/m;
+  const sxx=xs.reduce((a,x)=>a+(x-mx)**2,0),sxy=xs.reduce((a,x,i)=>a+(x-mx)*(ys[i]-my),0);
+  slope=sxx?sxy/sxx:0;slope*=m/(m+6);if(Math.abs(slope)<0.15)slope=0;slope=Math.max(-0.5,Math.min(0.5,slope));
+  if(slope)mu=Math.max(mu-4,Math.min(mu+4,my+slope*(m-mx)))}
+ const se=sd/Math.sqrt(PRIOR.k0+W);
+ const personal=W/(PRIOR.k0+W);
+ const nReal=cyc.filter(c=>c.type==='cycle'||c.type==='outlier').length;
+ const stage=W<0.9?0:W<3.5?1:2;
+ return{periods:p,cycles:cyc,len:mu,sd,se,slope,W,personal,stage,n:nReal,nImp:cyc.filter(c=>c.type==='imputed').length,s,
+  gaps:cyc.filter(c=>c.type==='imputed'&&c.part===0),intervals:real}
+}
+function backtest(periods,settings){
+ const p=[...new Set(periods)].sort((a,b)=>a-b),res=[];
+ for(let i=2;i<p.length;i++){const d=p[i]-p[i-1];if(d<20||d>40)continue;
+  const c=learn(p.slice(0,i),settings);res.push({actual:p[i],pred:Math.round(p[i-1]+c.len),err:p[i]-Math.round(p[i-1]+c.len),base:d-28})}
+ return res}
+function calibrate(periods,settings){const c=learn(periods,settings);c.bt=backtest(periods,settings);
+ const last=c.bt.slice(-6);c.mae=last.length?last.reduce((a,x)=>a+Math.abs(x.err),0)/last.length:null;c.baseMae=last.length?last.reduce((a,x)=>a+Math.abs(x.base),0)/last.length:null;return c}
+function forecast(cal,count){
+ const {periods,len,sd,se,slope,s}=cal;if(!periods.length)return[];
+ const last=periods[periods.length-1],starts=[last];let acc=last,drift=0;
+ for(let k=1;k<=count;k++){drift=Math.max(-3,Math.min(3,drift+slope));acc+=len+drift;starts.push(Math.round(acc))}
+ const errAt=k=>k===0?0:Math.max(1,Math.round(1.28*Math.sqrt(k*sd*sd+k*k*se*se)));
+ const out=[];
+ for(let k=0;k<count;k++){const start=starts[k],next=starts[k+1];
+  out.push({k,start,next,err:errAt(k),errNext:errAt(k+1),
+   period:[start,start+s.periodDays-1],p1:[next-s.p1[0],next-s.p1[1]],p2:[next-s.p2[0],next-s.p2[1]],pms:[next-s.pmsBefore,next-1]})}
+ return out}
+
+// ---- ICS ----
+function ymd(jdn){const g=d2g(jdn);return`${g.gy}${String(g.gm).padStart(2,'0')}${String(g.gd).padStart(2,'0')}`}
+function buildICS(cal,count,stamp){
+ const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//moodcast//fa','CALSCALE:GREGORIAN','X-WR-CALNAME:Moodcast'];
+ const ev=(uid,title,a,b,desc,alarms)=>{L.push('BEGIN:VEVENT',`UID:${uid}@moodcast`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${ymd(a)}`,`DTEND;VALUE=DATE:${ymd(b+1)}`,`SUMMARY:${title}`,`DESCRIPTION:${desc}`,'TRANSP:TRANSPARENT');
+  alarms.forEach(t=>L.push('BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${title}`,`TRIGGER:${t}`,'END:VALARM'));L.push('END:VEVENT')};
+ forecast(cal,count+1).forEach((c,i)=>{
+  if(i>0)ev(`period-${c.start}`,'🌧 شروع پریود (پیش‌بینی)',c.period[0],c.period[1],`خطای احتمالی ±${c.err} روز`,['-PT4H','PT9H']);
+  if(i>=count)return;
+  const e=c.errNext;
+  ev(`p1-${c.p1[0]}`,'☀️ ورود به اوج اولیه · هوا آفتابی',c.p1[0],c.p1[1],`±${e} روز`,['PT9H']);
+  ev(`pms-${c.pms[0]}`,'⛈ ورود به منطقه PMS · احتمال طوفان',c.pms[0],c.pms[1],`±${e} روز`,['-PT4H','PT9H']);
+  ev(`p2-${c.p2[0]}`,'🌤 ورود به اوج ثانویه',c.p2[0],c.p2[1],`±${e} روز`,['PT9H']);
+ });
+ L.push('END:VCALENDAR');return L.join('\r\n')+'\r\n'}
+
+const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const $=id=>document.getElementById(id);
+const jdate=x=>{const j=d2j(x);return`${fa(j.jd)} ${MONTHS[j.jm-1]}`};
+const jfull=x=>{const j=d2j(x);return`${fa(j.jd)} ${MONTHS[j.jm-1]} ${fa(j.jy)}`};
+const range=(a,b)=>{const ja=d2j(a),jb=d2j(b);return ja.jm===jb.jm?`${fa(ja.jd)} تا ${fa(jb.jd)} ${MONTHS[ja.jm-1]}`:`${jdate(a)} تا ${jdate(b)}`};
+const now=new Date();const TODAY=g2d(now.getFullYear(),now.getMonth()+1,now.getDate());
+const LS='charkhe-state';
+let state={periods:[],settings:{...DEFAULTS}};
+try{const s=JSON.parse(localStorage.getItem(LS)||'null');if(s&&Array.isArray(s.periods))state=s}catch(e){}
+
+function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
+function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toast('ذخیره نشد؛ حافظه مرورگر در دسترس نیست')}}
+
+// ---- dial ----
+const NS='http://www.w3.org/2000/svg';
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e}
+function pt(r,ang){const a=(ang-90)*Math.PI/180;return[160+r*Math.cos(a),160+r*Math.sin(a)]}
+function arc(r,a0,a1,color,w){
+ const [x0,y0]=pt(r,a0),[x1,y1]=pt(r,a1),large=a1-a0>180?1:0;
+ return el('path',{d:`M${x0} ${y0} A${r} ${r} 0 ${large} 1 ${x1} ${y1}`,stroke:color,'stroke-width':w,fill:'none','stroke-linecap':'butt'})}
+function drawDial(cal){
+ const svg=$('ring');svg.textContent='';
+ const L=Math.round(cal.len),s=cal.s,deg=360/L;
+ const dayArc=(r,a,b,c,w)=>{a=Math.max(1,a);b=Math.min(L,b);if(b<a)return;svg.appendChild(arc(r,(a-1)*deg+.6,b*deg-.6,c,w))};
+ svg.appendChild(el('circle',{cx:160,cy:160,r:128,stroke:'var(--soft)','stroke-width':18,fill:'none'}));
+ svg.appendChild(el('circle',{cx:160,cy:160,r:104,stroke:'var(--soft)','stroke-width':12,fill:'none'}));
+ dayArc(128,1,s.periodDays,'var(--period)',18);
+ dayArc(128,L+1-s.pmsBefore,L,'var(--pms)',18);
+ dayArc(104,L+1-s.p1[0],L+1-s.p1[1],'var(--p1)',12);
+ dayArc(104,L+1-s.p2[0],L+1-s.p2[1],'var(--p2)',12);
+ [1,7,14,21,L].forEach(d=>{const [x,y]=pt(150,(d-.5)*deg);const t=el('text',{x,y:y+4,'text-anchor':'middle','font-size':11,fill:'var(--muted)','font-family':'Vazirmatn,Tahoma,sans-serif'});t.textContent=fa(d);svg.appendChild(t)});
+ const center=(txt,y,size,w,c)=>{const t=el('text',{x:160,y,'text-anchor':'middle','font-size':size,'font-weight':w,fill:c,'font-family':'Vazirmatn,Tahoma,sans-serif'});t.textContent=txt;svg.appendChild(t)};
+ if(!cal.periods.length){center('هنوز تاریخی ثبت نشده',165,15,500,'var(--muted)');return}
+ const last=cal.periods[cal.periods.length-1],day=TODAY-last+1;
+ if(day>=1&&day<=L){
+  const [x,y]=pt(128,(day-.5)*deg);
+  svg.appendChild(el('circle',{cx:x,cy:y,r:13,fill:'var(--surface)',stroke:'var(--today)','stroke-width':3}));
+ }
+ let phase='بین فازها';
+ const inR=(a,b)=>day>=a&&day<=b;
+ if(inR(1,s.periodDays))phase='پریود';
+ else if(inR(L+1-s.p1[0],L+1-s.p1[1]))phase='اوج اولیه';
+ else if(inR(L+1-s.p2[0],L+1-s.p2[1]))phase=inR(L+1-s.pmsBefore,L)?'PMS + اوج ثانویه':'اوج ثانویه';
+ else if(inR(L+1-s.pmsBefore,L))phase='PMS';
+ if(day>L){center('تأخیر',140,15,500,'var(--muted)');center(fa(day-L)+' روز',178,36,800,'var(--period)');center('اگه شروع شد، ثبتش کن',204,12,400,'var(--muted)');return}
+ if(day<1){center('شروع ثبت‌شده در آینده است',165,13,500,'var(--muted)');return}
+ center('روز',128,14,500,'var(--muted)');
+ center(fa(day),176,52,800,'var(--ink)');
+ center('از ~'+fa(L),200,13,400,'var(--muted)');
+ center(phase,226,15,700,'var(--ink)');
+}
+
+// ---- upcoming ----
+function renderUpcoming(cal){
+ const box=$('upcoming');box.textContent='';
+ if(!cal.periods.length){box.innerHTML='<p class="note">اولین تاریخ شروع پریود رو پایین ثبت کن تا پیش‌بینی ساخته بشه.</p>';return}
+ const ev=[];
+ forecast(cal,3).forEach((c,i)=>{
+  if(i>0)ev.push({n:'پریود بعدی',c:'var(--period)',a:c.period[0],b:c.period[0],e:c.err});
+  ev.push({n:'اوج اولیه',c:'var(--p1)',a:c.p1[0],b:c.p1[1],e:c.errNext});
+  ev.push({n:'PMS',c:'var(--pms)',a:c.pms[0],b:c.pms[1],e:c.errNext});
+  ev.push({n:'اوج ثانویه',c:'var(--p2)',a:c.p2[0],b:c.p2[1],e:c.errNext});
+ });
+ const nextP=forecast(cal,2)[1];
+ if(nextP.start<TODAY) ev.unshift({n:'پریود (دیر کرده)',c:'var(--period)',a:TODAY,b:TODAY,e:0,late:TODAY-nextP.start});
+ ev.filter(x=>x.b>=TODAY).sort((x,y)=>x.a-y.a).slice(0,5).forEach(x=>{
+  const r=document.createElement('div');r.className='row';
+  const d=x.a-TODAY;
+  const when=x.late?`${fa(x.late)} روز`:d<=0?'الان':d===1?'فردا':`${fa(d)} روز`;
+  const sub=x.late?'از تاریخ پیش‌بینی گذشته':(x.a===x.b?jfull(x.a):range(x.a,x.b))+(x.e?` · ±${fa(x.e)}`:'');
+  r.innerHTML=`<span class="dot" style="background:${x.c}"></span><div><b></b><small></small></div><div class="cd"></div>`;
+  r.querySelector('b').textContent=x.n;r.querySelector('small').textContent=sub;r.querySelector('.cd').textContent=when;
+  box.appendChild(r)});
+}
+
+// ---- calibration ----
+function f1(x){return fa(x.toFixed(1)).replace('.','٫')}
+function renderCal(cal){
+ $('stLen').textContent=f1(cal.len);
+ $('stSd').textContent=f1(cal.sd);
+ $('stN').textContent=fa(Math.round(cal.personal*100))+'٪';
+ const ul=$('hist');ul.textContent='';
+ const p=cal.periods,byTo={};cal.cycles.forEach(c=>{(byTo[c.to]=byTo[c.to]||c)});
+ for(let i=p.length-1;i>=0;i--){
+  const li=document.createElement('li'),c=byTo[p[i]];
+  const left=document.createElement('span');left.textContent=jfull(p[i]);
+  const mid=document.createElement('span');
+  if(c){const d=c.to-c.from;mid.className='tag'+(c.type==='cycle'?'':' gap');
+   mid.textContent=c.type==='cycle'?`${fa(d)} روز`:c.type==='outlier'?`${fa(d)} روز · غیرعادی، وزن کم`:c.type==='imputed'?`${fa(d)} روز · ${fa(c.k)} چرخه، یکی ثبت نشده`:c.type==='long'?`${fa(d)} روز · نامعلوم، کنار گذاشته شد`:`${fa(d)} روز · خیلی کوتاه، نادیده`}
+  const x=document.createElement('button');x.className='x';x.textContent='حذف';
+  x.onclick=()=>{if(!x.classList.contains('sure')){x.classList.add('sure');x.textContent='مطمئنی؟';setTimeout(()=>{x.classList.remove('sure');x.textContent='حذف'},3000);return}
+   state.periods=state.periods.filter(v=>v!==p[i]);save();render();toast('حذف شد و دوباره یاد گرفت')};
+  li.append(left,mid,x);ul.appendChild(li)}
+ renderLearn(cal);
+}
+function renderLearn(cal){
+ const st=$('lStage');st.className='stage s'+cal.stage;
+ st.textContent=['پیش‌فرض عمومی','در حال یادگیری','شخصی‌سازی‌شده'][cal.stage];
+ $('lCount').textContent=`${fa(cal.n)} چرخهٔ کامل${cal.nImp?` + ${fa(cal.nImp)} چرخهٔ بازسازی‌شده`:''}`;
+ $('lMeter').style.width=Math.round(cal.personal*100)+'%';
+ // chart
+ const svg=$('lChart');svg.textContent='';
+ const cs=cal.cycles.filter(c=>c.type!=='short');
+ const lo=18,hi=42,y=v=>8+(hi-Math.max(lo,Math.min(hi,v)))/(hi-lo)*96;
+ const band=el('rect',{x:20,width:296,y:y(cal.len+cal.sd),height:Math.max(1,y(cal.len-cal.sd)-y(cal.len+cal.sd)),fill:'var(--p1)','fill-opacity':.12});svg.appendChild(band);
+ [21,28,35].forEach(v=>{svg.appendChild(el('line',{x1:20,x2:316,y1:y(v),y2:y(v),stroke:'var(--line)','stroke-width':1}));const t=el('text',{x:14,y:y(v)+4,'text-anchor':'end','font-size':10,fill:'var(--muted)','font-family':'Vazirmatn,Tahoma,sans-serif'});t.textContent=fa(v);svg.appendChild(t)});
+ svg.appendChild(el('line',{x1:20,x2:316,y1:y(cal.len),y2:y(cal.len),stroke:'var(--p1)','stroke-width':1.5,'stroke-dasharray':'4 3'}));
+ const show=cs.slice(-12),n=show.length,bw=n?Math.min(22,280/n-4):0;
+ show.forEach((c,i)=>{const x=310-(n-i)*(bw+4)+2,v=c.type==='long'?c.to-c.from:c.d;
+  const col=c.type==='cycle'?'var(--p1)':c.type==='imputed'?'var(--muted)':'var(--pms)';
+  svg.appendChild(el('rect',{x,width:bw,y:y(v),height:Math.max(2,104-y(v)),rx:3,fill:col,'fill-opacity':c.type==='imputed'?.5:1}))});
+ if(!n){const t=el('text',{x:168,y:64,'text-anchor':'middle','font-size':12,fill:'var(--muted)','font-family':'Vazirmatn,Tahoma,sans-serif'});t.textContent='با ثبت دومین پریود، اولین چرخه اینجا میاد';svg.appendChild(t)}
+ // facts
+ const F=$('lFacts');F.textContent='';
+ const add=(k,v)=>{const li=document.createElement('li');const a=document.createElement('span'),b=document.createElement('span');a.textContent=k;b.textContent=v;li.append(a,b);F.appendChild(li)};
+ add('طول چرخهٔ یادگرفته‌شده',`${f1(cal.len)} روز`);
+ add('نظم چرخه',cal.sd<=1.8?'خیلی منظم':cal.sd<=3?'منظم':cal.sd<=5?'نسبتاً نامنظم':'نامنظم');
+ add('روند',cal.slope>0?`کم‌کم بلندتر (+${f1(cal.slope)} روز در هر چرخه)`:cal.slope<0?`کم‌کم کوتاه‌تر (${f1(cal.slope)} روز در هر چرخه)`:'ثابت');
+ if(cal.mae!=null)add('خطای میانگین پیش‌بینی‌ها',`${f1(cal.mae)} روز (فرض ۲۸ روزه: ${f1(cal.baseMae)})`);
+ else add('خطای پیش‌بینی','بعد از ۳ ثبت معتبر حساب می‌شه');
+ const last=cal.bt[cal.bt.length-1];
+ if(last)add('آخرین پیش‌بینی',last.err===0?'دقیقاً درست':`${fa(Math.abs(last.err))} روز ${last.err>0?'دیرتر':'زودتر'} اومد`);
+}
+function renderTable(cal){
+ const tb=$('tb');tb.textContent='';
+ if(!cal.periods.length)return;
+ forecast(cal,13).slice(1).forEach(c=>{
+  const tr=document.createElement('tr');
+  [jdate(c.start),range(c.p1[0],c.p1[1]),jdate(c.pms[0]),range(c.p2[0],c.p2[1]),'±'+fa(c.err)].forEach(t=>{const td=document.createElement('td');td.textContent=t;tr.appendChild(td)});
+  tb.appendChild(tr)});
+}
+function render(){const cal=calibrate(state.periods,state.settings);drawDial(cal);renderUpcoming(cal);renderCal(cal);renderTable(cal);fillSettings()}
+
+// ---- date picker ----
+function initPicker(){
+ const t=d2j(TODAY);
+ const sy=$('sy'),sm=$('sm'),sd=$('sd');
+ for(let y=t.jy-1;y<=t.jy;y++)sy.add(new Option(fa(y),y));
+ MONTHS.forEach((m,i)=>sm.add(new Option(m,i+1)));
+ const fillDays=()=>{const keep=+sd.value||t.jd;sd.textContent='';const n=jMonthLen(+sy.value,+sm.value);for(let d=1;d<=n;d++)sd.add(new Option(fa(d),d));sd.value=Math.min(keep,n)};
+ sy.value=t.jy;sm.value=t.jm;fillDays();sd.value=t.jd;
+ sy.onchange=fillDays;sm.onchange=fillDays;
+ $('add').onclick=()=>{
+  const x=j2d(+sy.value,+sm.value,+sd.value);
+  if(x>TODAY){toast('تاریخ آینده قابل ثبت نیست');return}
+  if(state.periods.includes(x)){toast('این تاریخ قبلاً ثبت شده');return}
+  const near=state.periods.find(v=>Math.abs(v-x)<10);
+  if(near){toast(`به ${jfull(near)} خیلی نزدیکه؛ اگه اشتباهه اول اون رو حذف کن`);return}
+  const before=state.periods.length?forecast(calibrate(state.periods,state.settings),2)[1]:null;
+  state.periods=[...state.periods,x].sort((a,b)=>a-b);save();render();
+  if(before&&x>before.start-20){const e=x-before.start;toast(e===0?'دقیقاً همون روزی که پیش‌بینی شده بود! مدل به‌روز شد.':`${fa(Math.abs(e))} روز ${e>0?'دیرتر':'زودتر'} از پیش‌بینی. مدل یاد گرفت؛ تقویم رو دوباره اضافه کن.`)}
+  else toast('ثبت شد و مدل به‌روز شد. تقویم رو دوباره اضافه کن.')};
+}
+
+// ---- settings ----
+const SET=[['cPd','periodDays'],['cPms','pmsBefore'],['cP1a','p1',0],['cP1b','p1',1],['cP2a','p2',0],['cP2b','p2',1]];
+function fillSettings(){const s={...DEFAULTS,...state.settings};SET.forEach(([id,k,i])=>{const e=$(id);if(document.activeElement!==e)e.value=i===undefined?s[k]:s[k][i]})}
+SET.forEach(([id,k,i])=>$(id).addEventListener('change',()=>{
+ const v=Math.round(+$(id).value);if(!v||v<1)return fillSettings();
+ const s={...DEFAULTS,...state.settings,p1:[...(state.settings.p1||DEFAULTS.p1)],p2:[...(state.settings.p2||DEFAULTS.p2)]};
+ if(i===undefined)s[k]=v;else s[k][i]=v;
+ if(s.p1[0]<s.p1[1])s.p1.reverse();if(s.p2[0]<s.p2[1])s.p2.reverse();
+ state.settings=s;save();render();toast('تنظیمات ذخیره شد')}));
+
+// ---- ics ----
+function icsFile(){
+ const cal=calibrate(state.periods,state.settings);
+ if(!cal.periods.length){toast('اول یک تاریخ شروع پریود ثبت کن');return null}
+ const st=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+ return new File([buildICS(cal,12,st)],'moodcast.ics',{type:'text/calendar'});
+}
+$('ics').onclick=()=>{const f=icsFile();if(!f)return;location.href=URL.createObjectURL(f)};
+$('icsTest').onclick=()=>{
+ const p=n=>String(n).padStart(2,'0'),f=d=>`${d.getUTCFullYear()}${p(d.getUTCMonth()+1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}00Z`;
+ const a=new Date(Date.now()+3*60000),b=new Date(a.getTime()+15*60000),n=Date.now();
+ const t=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//moodcast//fa','BEGIN:VEVENT',`UID:test-${n}@moodcast`,`DTSTAMP:${f(new Date())}`,`DTSTART:${f(a)}`,`DTEND:${f(b)}`,'SUMMARY:⛈ تست Moodcast','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:⛈ تست Moodcast','TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n')+'\r\n';
+ location.href=URL.createObjectURL(new File([t],'test.ics',{type:'text/calendar'}));
+};
+$('icsShare').onclick=async()=>{const f=icsFile();if(!f)return;
+ if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]})}catch(e){}return}
+ const u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download='moodcast.ics';document.body.appendChild(a);a.click();a.remove()};
+
+// ---- backup ----
+$('bkOut').onclick=async()=>{const t=JSON.stringify(state);$('bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('کپی شد؛ یه جا نگهش دار')}catch(e){$('bkTxt').select();toast('متن رو انتخاب کردم؛ کپی کن')}};
+$('bkIn').onclick=()=>{try{const s=JSON.parse($('bkTxt').value);if(!Array.isArray(s.periods))throw 0;state={periods:s.periods.map(Number).filter(Boolean),settings:{...DEFAULTS,...(s.settings||{})}};save();render();toast('بازیابی شد')}catch(e){toast('متن پشتیبان معتبر نیست')}};
+
+// ---- boot ----
+$('today').textContent=jfull(TODAY);initPicker();render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
